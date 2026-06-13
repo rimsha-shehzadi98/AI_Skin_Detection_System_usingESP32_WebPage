@@ -1,792 +1,1997 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Skin Lesion Detection | FYP 2022–2026 | GCUF</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Skin Lesion Detection | FYP 2022–2026 | GCUF</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-/* ── THEME TOKENS ── */
-[data-theme="dark"]{
-  --bg:#03080f;--bg2:#060e1c;--bg3:#0b1628;--surface:#0f1f35;
-  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
-  --text:#e8f0f7;--muted:#7a9bb5;--muted2:#3a5570;
-  --card-bg:#0b1628;--nav-bg:rgba(3,8,15,0.88);
-  --teal:#00d2b4;--blue:#3b82f6;--amber:#f59e0b;--purple:#8b5cf6;--red:#ef4444;
-}
-[data-theme="light"]{
-  --bg:#f4f7fb;--bg2:#eaf0f8;--bg3:#fff;--surface:#e2eaf4;
-  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
-  --text:#0f1e2d;--muted:#4a6580;--muted2:#8aa4be;
-  --card-bg:#ffffff;--nav-bg:rgba(244,247,251,0.92);
-  --teal:#009f88;--blue:#1d6fe0;--amber:#d97706;--purple:#6d3fd4;--red:#dc2626;
-}
+      /* ── THEME TOKENS ── */
+      [data-theme="dark"] {
+        --bg: #03080f;
+        --bg2: #060e1c;
+        --bg3: #0b1628;
+        --surface: #0f1f35;
+        --border: rgba(255, 255, 255, 0.07);
+        --border2: rgba(255, 255, 255, 0.13);
+        --text: #e8f0f7;
+        --muted: #7a9bb5;
+        --muted2: #3a5570;
+        --card-bg: #0b1628;
+        --nav-bg: rgba(3, 8, 15, 0.88);
+        --teal: #00d2b4;
+        --blue: #3b82f6;
+        --amber: #f59e0b;
+        --purple: #8b5cf6;
+        --red: #ef4444;
+      }
+      [data-theme="light"] {
+        --bg: #f4f7fb;
+        --bg2: #eaf0f8;
+        --bg3: #fff;
+        --surface: #e2eaf4;
+        --border: rgba(0, 0, 0, 0.08);
+        --border2: rgba(0, 0, 0, 0.14);
+        --text: #0f1e2d;
+        --muted: #4a6580;
+        --muted2: #8aa4be;
+        --card-bg: #ffffff;
+        --nav-bg: rgba(244, 247, 251, 0.92);
+        --teal: #009f88;
+        --blue: #1d6fe0;
+        --amber: #d97706;
+        --purple: #6d3fd4;
+        --red: #dc2626;
+      }
 
-html{scroll-behavior:smooth}
-body{
-  font-family:'Inter',system-ui,sans-serif;
-  background:var(--bg);color:var(--text);
-  overflow-x:hidden;line-height:1.6;
-  font-size:16px;letter-spacing:0;
-  transition:background .3s,color .3s;
-}
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: "Inter", system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        overflow-x: hidden;
+        line-height: 1.6;
+        font-size: 16px;
+        letter-spacing: 0;
+        transition: background 0.3s, color 0.3s;
+      }
 
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:var(--bg)}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+      /* ── SCROLLBAR ── */
+      ::-webkit-scrollbar {
+        width: 5px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--bg);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--border2);
+        border-radius: 3px;
+      }
 
-/* ── PROGRESS BAR ── */
-#prog{position:fixed;top:0;left:0;height:2px;z-index:2000;
-  background:linear-gradient(90deg,var(--teal),var(--blue));
-  width:0%;transition:width .1s linear;box-shadow:0 0 6px var(--teal)}
+      /* ── PROGRESS BAR ── */
+      #prog {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 2px;
+        z-index: 2000;
+        background: linear-gradient(90deg, var(--teal), var(--blue));
+        width: 0%;
+        transition: width 0.1s linear;
+        box-shadow: 0 0 6px var(--teal);
+      }
 
-/* ── NAV ── */
-nav{
-  position:fixed;top:0;left:0;right:0;z-index:1000;
-  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
-  background:var(--nav-bg);
-  border-bottom:1px solid var(--border);
-  padding:0 32px;height:60px;
-  display:flex;align-items:center;justify-content:space-between;
-  transition:background .3s;
-}
-.nav-brand{display:flex;align-items:center;gap:10px}
-.nav-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);
-  animation:pulse-dot 2s ease-in-out infinite}
-@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
-.nav-title{font-size:14px;font-weight:700;color:var(--text);letter-spacing:-.2px}
-.nav-links{display:flex;gap:2px;list-style:none}
-.nav-links a{
-  color:var(--muted);font-size:13px;font-weight:500;
-  text-decoration:none;padding:5px 12px;border-radius:20px;
-  transition:all .2s;white-space:nowrap;
-}
-.nav-links a:hover,.nav-links a.active{color:var(--text);background:var(--surface)}
-.nav-right{display:flex;align-items:center;gap:8px}
-.nav-badge{
-  background:rgba(0,210,180,0.1);border:1px solid rgba(0,210,180,0.25);
-  color:var(--teal);font-size:11px;font-weight:600;
-  padding:3px 10px;border-radius:20px;font-family:'JetBrains Mono',monospace;
-  white-space:nowrap;
-}
-.theme-btn{
-  width:34px;height:34px;border-radius:50%;border:1px solid var(--border2);
-  background:var(--surface);color:var(--text);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;font-size:16px;
-  transition:all .2s;flex-shrink:0;
-}
-.theme-btn:hover{background:var(--border2)}
-.menu-btn{display:none;background:none;border:none;cursor:pointer;color:var(--text);font-size:20px;padding:4px}
+      /* ── NAV ── */
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        background: var(--nav-bg);
+        border-bottom: 1px solid var(--border);
+        padding: 0 32px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: background 0.3s;
+      }
+      .nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .nav-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--teal);
+        animation: pulse-dot 2s ease-in-out infinite;
+      }
+      @keyframes pulse-dot {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.5;
+          transform: scale(0.7);
+        }
+      }
+      .nav-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text);
+        letter-spacing: -0.2px;
+      }
+      .nav-links {
+        display: flex;
+        gap: 2px;
+        list-style: none;
+      }
+      .nav-links a {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: none;
+        padding: 5px 12px;
+        border-radius: 20px;
+        transition: all 0.2s;
+        white-space: nowrap;
+      }
+      .nav-links a:hover,
+      .nav-links a.active {
+        color: var(--text);
+        background: var(--surface);
+      }
+      .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .nav-badge {
+        background: rgba(0, 210, 180, 0.1);
+        border: 1px solid rgba(0, 210, 180, 0.25);
+        color: var(--teal);
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-family: "JetBrains Mono", monospace;
+        white-space: nowrap;
+      }
+      .theme-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 1px solid var(--border2);
+        background: var(--surface);
+        color: var(--text);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        transition: all 0.2s;
+        flex-shrink: 0;
+      }
+      .theme-btn:hover {
+        background: var(--border2);
+      }
+      .menu-btn {
+        display: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--text);
+        font-size: 20px;
+        padding: 4px;
+      }
 
-/* ── HERO ── */
-#hero{
-  min-height:100vh;display:flex;align-items:center;justify-content:center;
-  text-align:center;padding:100px 24px 70px;position:relative;overflow:hidden;
-}
-.hero-bg{
-  position:absolute;inset:0;z-index:0;
-  background:
-    radial-gradient(ellipse 70% 50% at 50% -5%,rgba(0,210,180,0.1) 0%,transparent 60%),
-    radial-gradient(ellipse 50% 40% at 85% 65%,rgba(59,130,246,0.07) 0%,transparent 60%);
-}
-[data-theme="light"] .hero-bg{
-  background:
-    radial-gradient(ellipse 70% 50% at 50% -5%,rgba(0,159,136,0.08) 0%,transparent 60%),
-    radial-gradient(ellipse 50% 40% at 85% 65%,rgba(29,111,224,0.06) 0%,transparent 60%);
-}
-.hero-grid{
-  position:absolute;inset:0;z-index:0;
-  background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);
-  background-size:56px 56px;
-  mask-image:radial-gradient(ellipse 85% 75% at 50% 50%,black 0%,transparent 100%);
-}
-.hero-content{position:relative;z-index:1;max-width:860px;margin:0 auto}
-.hero-eyebrow{
-  display:inline-flex;align-items:center;gap:7px;
-  background:rgba(0,210,180,0.07);border:1px solid rgba(0,210,180,0.22);
-  border-radius:30px;padding:5px 14px;
-  font-size:11px;font-weight:600;color:var(--teal);
-  letter-spacing:.8px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;
-  margin-bottom:24px;opacity:0;animation:fadeUp .7s .2s forwards;
-}
-.hero-title{
-  font-size:clamp(34px,6vw,68px);font-weight:800;
-  line-height:1.08;letter-spacing:-1.5px;margin-bottom:16px;
-  opacity:0;animation:fadeUp .7s .35s forwards;
-}
-.hero-title .teal{color:var(--teal)}
-.hero-title .blue{color:var(--blue)}
-.hero-subtitle{
-  font-size:clamp(15px,1.8vw,18px);color:var(--muted);font-weight:400;
-  max-width:620px;margin:0 auto 36px;line-height:1.7;
-  opacity:0;animation:fadeUp .7s .5s forwards;
-}
-.hero-tags{
-  display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;
-  margin-bottom:44px;opacity:0;animation:fadeUp .7s .65s forwards;
-}
-.hero-tag{
-  display:flex;align-items:center;gap:6px;
-  background:var(--surface);border:1px solid var(--border2);
-  border-radius:30px;padding:6px 14px;font-size:12px;color:var(--muted);font-weight:500;
-}
-.hero-tag .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.hero-stats{
-  display:flex;flex-wrap:wrap;justify-content:center;gap:16px;
-  opacity:0;animation:fadeUp .7s .8s forwards;
-}
-.hero-stat{
-  text-align:center;padding:18px 24px;
-  background:var(--card-bg);border:1px solid var(--border2);
-  border-radius:12px;min-width:110px;flex:1 1 110px;max-width:150px;
-  transition:transform .25s,box-shadow .25s;
-}
-.hero-stat:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,210,180,0.12)}
-.hero-stat-val{font-size:25px;font-weight:800;line-height:1;margin-bottom:4px;letter-spacing:-1px}
-.hero-stat-val.teal{color:var(--teal)}
-.hero-stat-val.blue{color:var(--blue)}
-.hero-stat-val.amber{color:var(--amber)}
-.hero-stat-label{font-size:10px;color:var(--muted2);letter-spacing:.8px;text-transform:uppercase;font-weight:600}
-@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+      /* ── HERO ── */
+      #hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 100px 24px 70px;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero-bg {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        background: radial-gradient(
+            ellipse 70% 50% at 50% -5%,
+            rgba(0, 210, 180, 0.1) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse 50% 40% at 85% 65%,
+            rgba(59, 130, 246, 0.07) 0%,
+            transparent 60%
+          );
+      }
+      [data-theme="light"] .hero-bg {
+        background: radial-gradient(
+            ellipse 70% 50% at 50% -5%,
+            rgba(0, 159, 136, 0.08) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse 50% 40% at 85% 65%,
+            rgba(29, 111, 224, 0.06) 0%,
+            transparent 60%
+          );
+      }
+      .hero-grid {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        background-image: linear-gradient(var(--border) 1px, transparent 1px),
+          linear-gradient(90deg, var(--border) 1px, transparent 1px);
+        background-size: 56px 56px;
+        mask-image: radial-gradient(
+          ellipse 85% 75% at 50% 50%,
+          black 0%,
+          transparent 100%
+        );
+      }
+      .hero-content {
+        position: relative;
+        z-index: 1;
+        max-width: 860px;
+        margin: 0 auto;
+      }
+      .hero-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: rgba(0, 210, 180, 0.07);
+        border: 1px solid rgba(0, 210, 180, 0.22);
+        border-radius: 30px;
+        padding: 5px 14px;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--teal);
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        font-family: "JetBrains Mono", monospace;
+        margin-bottom: 24px;
+        opacity: 0;
+        animation: fadeUp 0.7s 0.2s forwards;
+      }
+      .hero-title {
+        font-size: clamp(34px, 6vw, 68px);
+        font-weight: 800;
+        line-height: 1.08;
+        letter-spacing: -1.5px;
+        margin-bottom: 16px;
+        opacity: 0;
+        animation: fadeUp 0.7s 0.35s forwards;
+      }
+      .hero-title .teal {
+        color: var(--teal);
+      }
+      .hero-title .blue {
+        color: var(--blue);
+      }
+      .hero-subtitle {
+        font-size: clamp(15px, 1.8vw, 18px);
+        color: var(--muted);
+        font-weight: 400;
+        max-width: 620px;
+        margin: 0 auto 36px;
+        line-height: 1.7;
+        opacity: 0;
+        animation: fadeUp 0.7s 0.5s forwards;
+      }
+      .hero-tags {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 44px;
+        opacity: 0;
+        animation: fadeUp 0.7s 0.65s forwards;
+      }
+      .hero-tag {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--surface);
+        border: 1px solid var(--border2);
+        border-radius: 30px;
+        padding: 6px 14px;
+        font-size: 12px;
+        color: var(--muted);
+        font-weight: 500;
+      }
+      .hero-tag .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .hero-stats {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 16px;
+        opacity: 0;
+        animation: fadeUp 0.7s 0.8s forwards;
+      }
+      .hero-stat {
+        text-align: center;
+        padding: 18px 24px;
+        background: var(--card-bg);
+        border: 1px solid var(--border2);
+        border-radius: 12px;
+        min-width: 110px;
+        flex: 1 1 110px;
+        max-width: 150px;
+        transition: transform 0.25s, box-shadow 0.25s;
+      }
+      .hero-stat:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 30px rgba(0, 210, 180, 0.12);
+      }
+      .hero-stat-val {
+        font-size: 25px;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 4px;
+        letter-spacing: -1px;
+      }
+      .hero-stat-val.teal {
+        color: var(--teal);
+      }
+      .hero-stat-val.blue {
+        color: var(--blue);
+      }
+      .hero-stat-val.amber {
+        color: var(--amber);
+      }
+      .hero-stat-label {
+        font-size: 10px;
+        color: var(--muted2);
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        font-weight: 600;
+      }
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
-/* ── SHARED SECTION ── */
-section{padding:80px 0}
-.container{max-width:1060px;margin:0 auto;padding:0 24px}
-.sec-label{
-  font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;
-  color:var(--teal);letter-spacing:2px;text-transform:uppercase;
-  display:inline-flex;align-items:center;gap:8px;margin-bottom:12px;
-}
-.sec-label::before{content:'';width:18px;height:2px;background:var(--teal);border-radius:1px}
-.sec-title{font-size:clamp(24px,3.5vw,36px);font-weight:800;line-height:1.15;margin-bottom:12px;letter-spacing:-.5px}
-.sec-desc{font-size:15px;color:var(--muted);max-width:560px;line-height:1.7}
-.divider{height:1px;background:var(--border)}
-.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
-.reveal.visible{opacity:1;transform:translateY(0)}
-.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}
+      /* ── SHARED SECTION ── */
+      section {
+        padding: 80px 0;
+      }
+      .container {
+        max-width: 1060px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+      .sec-label {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--teal);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .sec-label::before {
+        content: "";
+        width: 18px;
+        height: 2px;
+        background: var(--teal);
+        border-radius: 1px;
+      }
+      .sec-title {
+        font-size: clamp(24px, 3.5vw, 36px);
+        font-weight: 800;
+        line-height: 1.15;
+        margin-bottom: 12px;
+        letter-spacing: -0.5px;
+      }
+      .sec-desc {
+        font-size: 15px;
+        color: var(--muted);
+        max-width: 560px;
+        line-height: 1.7;
+      }
+      .divider {
+        height: 1px;
+        background: var(--border);
+      }
+      .reveal {
+        opacity: 0;
+        transform: translateY(24px);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+      }
+      .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .d1 {
+        transition-delay: 0.1s;
+      }
+      .d2 {
+        transition-delay: 0.2s;
+      }
+      .d3 {
+        transition-delay: 0.3s;
+      }
+      .d4 {
+        transition-delay: 0.4s;
+      }
 
-/* ── TEAM ── */
-#team{background:var(--bg2)}
-.team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:40px}
-.team-card{
-  background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:24px;
-  position:relative;overflow:hidden;transition:transform .25s,border-color .25s,box-shadow .25s;
-}
-.team-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:var(--top-line);opacity:0;transition:opacity .25s;
-}
-.team-card:hover{transform:translateY(-5px);border-color:var(--border2)}
-.team-card:hover::before{opacity:1}
-.team-card.supervisor{--top-line:linear-gradient(90deg,var(--amber),#d97706)}
-.team-card.member{--top-line:linear-gradient(90deg,var(--teal),var(--blue))}
-.team-card.supervisor:hover{box-shadow:0 10px 32px rgba(245,158,11,0.12)}
-.team-card.member:hover{box-shadow:0 10px 32px rgba(0,210,180,0.1)}
-.team-avatar{
-  width:56px;height:56px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-weight:800;font-size:18px;margin-bottom:14px;
-}
-.team-avatar.sup{background:rgba(245,158,11,0.1);color:var(--amber);border:2px solid rgba(245,158,11,0.25)}
-.team-avatar.mem{background:rgba(0,210,180,0.09);color:var(--teal);border:2px solid rgba(0,210,180,0.25)}
-.team-role{font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;margin-bottom:5px}
-.team-role.sup{color:var(--amber)}
-.team-role.mem{color:var(--teal)}
-.team-name{font-size:18px;font-weight:700;margin-bottom:5px;letter-spacing:-.2px}
-.team-id{
-  font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted2);
-  background:var(--surface);border:1px solid var(--border);
-  display:inline-block;padding:2px 10px;border-radius:20px;margin-bottom:10px;
-}
-.team-dept{font-size:13px;color:var(--muted);line-height:1.6}
+      /* ── TEAM ── */
+      #team {
+        background: var(--bg2);
+      }
+      .team-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 16px;
+        margin-top: 40px;
+      }
+      .team-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 24px;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+      }
+      .team-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--top-line);
+        opacity: 0;
+        transition: opacity 0.25s;
+      }
+      .team-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--border2);
+      }
+      .team-card:hover::before {
+        opacity: 1;
+      }
+      .team-card.supervisor {
+        --top-line: linear-gradient(90deg, var(--amber), #d97706);
+      }
+      .team-card.member {
+        --top-line: linear-gradient(90deg, var(--teal), var(--blue));
+      }
+      .team-card.supervisor:hover {
+        box-shadow: 0 10px 32px rgba(245, 158, 11, 0.12);
+      }
+      .team-card.member:hover {
+        box-shadow: 0 10px 32px rgba(0, 210, 180, 0.1);
+      }
+      .team-avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 18px;
+        margin-bottom: 14px;
+      }
+      .team-avatar.sup {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--amber);
+        border: 2px solid rgba(245, 158, 11, 0.25);
+      }
+      .team-avatar.mem {
+        background: rgba(0, 210, 180, 0.09);
+        color: var(--teal);
+        border: 2px solid rgba(0, 210, 180, 0.25);
+      }
+      .team-role {
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        font-family: "JetBrains Mono", monospace;
+        margin-bottom: 5px;
+      }
+      .team-role.sup {
+        color: var(--amber);
+      }
+      .team-role.mem {
+        color: var(--teal);
+      }
+      .team-name {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 5px;
+        letter-spacing: -0.2px;
+      }
+      .team-id {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        color: var(--muted2);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 20px;
+        margin-bottom: 10px;
+      }
+      .team-dept {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
 
-/* ── ABSTRACT ── */
-#abstract{background:var(--bg)}
-.abstract-box{
-  background:var(--card-bg);border:1px solid var(--border);border-radius:16px;
-  padding:40px;position:relative;overflow:hidden;margin-top:40px;
-}
-.abstract-box::before{
-  content:'"';position:absolute;top:-30px;left:28px;
-  font-size:180px;color:rgba(0,210,180,0.04);line-height:1;pointer-events:none;font-weight:900;
-}
-.abstract-text{font-size:15px;line-height:1.85;color:var(--muted);position:relative;z-index:1}
-.abstract-text p{margin-bottom:14px}
-.abstract-text p:last-child{margin-bottom:0}
-.abstract-text strong{color:var(--text);font-weight:600}
-.keywords{display:flex;flex-wrap:wrap;gap:7px;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
-.kw{
-  font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;
-  background:rgba(59,130,246,0.07);border:1px solid rgba(59,130,246,0.18);
-  color:var(--blue);padding:3px 10px;border-radius:20px;letter-spacing:.3px;
-}
+      /* ── ABSTRACT ── */
+      #abstract {
+        background: var(--bg);
+      }
+      .abstract-box {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 40px;
+        position: relative;
+        overflow: hidden;
+        margin-top: 40px;
+      }
+      .abstract-box::before {
+        content: '"';
+        position: absolute;
+        top: -30px;
+        left: 28px;
+        font-size: 180px;
+        color: rgba(0, 210, 180, 0.04);
+        line-height: 1;
+        pointer-events: none;
+        font-weight: 900;
+      }
+      .abstract-text {
+        font-size: 15px;
+        line-height: 1.85;
+        color: var(--muted);
+        position: relative;
+        z-index: 1;
+      }
+      .abstract-text p {
+        margin-bottom: 14px;
+      }
+      .abstract-text p:last-child {
+        margin-bottom: 0;
+      }
+      .abstract-text strong {
+        color: var(--text);
+        font-weight: 600;
+      }
+      .keywords {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-top: 24px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border);
+      }
+      .kw {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        font-weight: 600;
+        background: rgba(59, 130, 246, 0.07);
+        border: 1px solid rgba(59, 130, 246, 0.18);
+        color: var(--blue);
+        padding: 3px 10px;
+        border-radius: 20px;
+        letter-spacing: 0.3px;
+      }
 
-/* ── TOOLS ── */
-#tools{background:var(--bg2)}
-.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-top:40px}
-.tool-card{
-  background:var(--card-bg);border:1px solid var(--border);border-radius:12px;
-  padding:20px;transition:transform .25s,border-color .25s;
-}
-.tool-card:hover{transform:translateY(-4px);border-color:var(--border2)}
-.tool-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
-.tool-icon{width:40px;height:40px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px}
-.tool-badge{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:20px;letter-spacing:.3px}
-.tool-name{font-size:14px;font-weight:700;margin-bottom:5px}
-.tool-desc{font-size:12px;color:var(--muted);line-height:1.55}
+      /* ── TOOLS ── */
+      #tools {
+        background: var(--bg2);
+      }
+      .tools-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 14px;
+        margin-top: 40px;
+      }
+      .tool-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        transition: transform 0.25s, border-color 0.25s;
+      }
+      .tool-card:hover {
+        transform: translateY(-4px);
+        border-color: var(--border2);
+      }
+      .tool-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+      .tool-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+      }
+      .tool-badge {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 20px;
+        letter-spacing: 0.3px;
+      }
+      .tool-name {
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 5px;
+      }
+      .tool-desc {
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.55;
+      }
 
-/* ── DOWNLOADS ── */
-#downloads{background:var(--bg)}
-.dl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:40px}
-.dl-card{
-  background:var(--card-bg);border:1px solid var(--border);border-radius:14px;
-  padding:22px;display:flex;flex-direction:column;
-  transition:transform .25s,border-color .25s;position:relative;overflow:hidden;
-}
-.dl-card::after{
-  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
-  background:var(--lc,var(--teal));opacity:.3;
-  transform:scaleX(0);transform-origin:left;transition:transform .35s;
-}
-.dl-card:hover{transform:translateY(-4px);border-color:var(--border2)}
-.dl-card:hover::after{transform:scaleX(1)}
-.dl-icon{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px}
-.dl-type{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.2px;text-transform:uppercase;font-weight:600;margin-bottom:5px}
-.dl-title{font-size:16px;font-weight:700;margin-bottom:7px;letter-spacing:-.2px}
-.dl-desc{font-size:12.5px;color:var(--muted);line-height:1.6;flex:1;margin-bottom:18px}
-.dl-btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:7px;
-  padding:9px 18px;border-radius:9px;font-size:12px;font-weight:600;
-  text-decoration:none;border:none;cursor:pointer;transition:all .2s;width:100%;
-}
-.dl-btn:hover{filter:brightness(1.12);transform:scale(1.01)}
-.dl-btn svg{width:14px;height:14px;flex-shrink:0}
+      /* ── DOWNLOADS ── */
+      #downloads {
+        background: var(--bg);
+      }
+      .dl-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 16px;
+        margin-top: 40px;
+      }
+      .dl-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 22px;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.25s, border-color 0.25s;
+        position: relative;
+        overflow: hidden;
+      }
+      .dl-card::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: var(--lc, var(--teal));
+        opacity: 0.3;
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.35s;
+      }
+      .dl-card:hover {
+        transform: translateY(-4px);
+        border-color: var(--border2);
+      }
+      .dl-card:hover::after {
+        transform: scaleX(1);
+      }
+      .dl-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        margin-bottom: 14px;
+      }
+      .dl-type {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        font-weight: 600;
+        margin-bottom: 5px;
+      }
+      .dl-title {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 7px;
+        letter-spacing: -0.2px;
+      }
+      .dl-desc {
+        font-size: 12.5px;
+        color: var(--muted);
+        line-height: 1.6;
+        flex: 1;
+        margin-bottom: 18px;
+      }
+      .dl-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 9px 18px;
+        border-radius: 9px;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        width: 100%;
+      }
+      .dl-btn:hover {
+        filter: brightness(1.12);
+        transform: scale(1.01);
+      }
+      .dl-btn svg {
+        width: 14px;
+        height: 14px;
+        flex-shrink: 0;
+      }
 
-/* ── VIDEO ── */
-#video{background:var(--bg2)}
-.video-wrap{
-  margin-top:40px;background:var(--card-bg);border:1px solid var(--border);
-  border-radius:16px;overflow:hidden;
-}
-.video-placeholder{
-  aspect-ratio:16/9;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:16px;
-  background:var(--card-bg);position:relative;
-}
-.play-btn{
-  width:72px;height:72px;border-radius:50%;
-  background:rgba(0,210,180,0.12);border:2px solid rgba(0,210,180,0.35);
-  display:flex;align-items:center;justify-content:center;cursor:pointer;
-  transition:all .25s;animation:pulse-play 3s ease-in-out infinite;
-}
-.play-btn:hover{background:rgba(0,210,180,0.22);transform:scale(1.08)}
-.play-btn svg{width:28px;height:28px;color:var(--teal);margin-left:4px}
-@keyframes pulse-play{0%,100%{box-shadow:0 0 0 0 rgba(0,210,180,.3)}50%{box-shadow:0 0 0 18px rgba(0,210,180,0)}}
-.video-label{font-size:14px;color:var(--muted);text-align:center}
-.video-label strong{display:block;font-size:18px;color:var(--text);font-weight:700;margin-bottom:6px}
-.video-label code{
-  display:inline-block;margin-top:6px;background:var(--surface);border:1px solid var(--border2);
-  font-family:'JetBrains Mono',monospace;font-size:11px;padding:3px 10px;border-radius:5px;color:var(--teal);
-}
+      /* ── VIDEO ── */
+      #video {
+        background: var(--bg2);
+      }
+      .video-wrap {
+        margin-top: 40px;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+      }
+      .video-placeholder {
+        aspect-ratio: 16/9;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        background: var(--card-bg);
+        position: relative;
+      }
+      .play-btn {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: rgba(0, 210, 180, 0.12);
+        border: 2px solid rgba(0, 210, 180, 0.35);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.25s;
+        animation: pulse-play 3s ease-in-out infinite;
+      }
+      .play-btn:hover {
+        background: rgba(0, 210, 180, 0.22);
+        transform: scale(1.08);
+      }
+      .play-btn svg {
+        width: 28px;
+        height: 28px;
+        color: var(--teal);
+        margin-left: 4px;
+      }
+      @keyframes pulse-play {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(0, 210, 180, 0.3);
+        }
+        50% {
+          box-shadow: 0 0 0 18px rgba(0, 210, 180, 0);
+        }
+      }
+      .video-label {
+        font-size: 14px;
+        color: var(--muted);
+        text-align: center;
+      }
+      .video-label strong {
+        display: block;
+        font-size: 18px;
+        color: var(--text);
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+      .video-label code {
+        display: inline-block;
+        margin-top: 6px;
+        background: var(--surface);
+        border: 1px solid var(--border2);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        padding: 3px 10px;
+        border-radius: 5px;
+        color: var(--teal);
+      }
 
-/* ── POSTER ── */
-#poster{background:var(--bg)}
-.poster-box{
-  margin-top:40px;background:var(--card-bg);border:1px solid var(--border);
-  border-radius:16px;padding:32px;display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap;
-}
-.poster-preview{
-  flex:0 0 280px;aspect-ratio:3/4;background:var(--surface);border-radius:10px;
-  border:2px dashed var(--border2);display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:10px;
-  text-align:center;color:var(--muted2);font-size:13px;transition:border-color .25s;
-}
-.poster-preview:hover{border-color:rgba(0,210,180,.4)}
-.poster-preview svg{width:40px;height:40px;color:var(--muted2)}
-.poster-info{flex:1;min-width:220px}
-.poster-info h3{font-size:22px;font-weight:800;margin-bottom:10px;letter-spacing:-.3px}
-.poster-info p{color:var(--muted);font-size:14px;line-height:1.7;margin-bottom:20px}
-.poster-specs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:20px}
-.poster-spec{
-  font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;
-  background:var(--surface);border:1px solid var(--border2);
-  color:var(--muted);padding:4px 10px;border-radius:20px;
-}
+      /* ── POSTER ── */
+      #poster {
+        background: var(--bg);
+      }
+      .poster-box {
+        margin-top: 40px;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 32px;
+        display: flex;
+        gap: 32px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+      }
+      .poster-preview {
+        flex: 0 0 280px;
+        aspect-ratio: 3/4;
+        background: var(--surface);
+        border-radius: 10px;
+        border: 2px dashed var(--border2);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        text-align: center;
+        color: var(--muted2);
+        font-size: 13px;
+        transition: border-color 0.25s;
+      }
+      .poster-preview:hover {
+        border-color: rgba(0, 210, 180, 0.4);
+      }
+      .poster-preview svg {
+        width: 40px;
+        height: 40px;
+        color: var(--muted2);
+      }
+      .poster-info {
+        flex: 1;
+        min-width: 220px;
+      }
+      .poster-info h3 {
+        font-size: 22px;
+        font-weight: 800;
+        margin-bottom: 10px;
+        letter-spacing: -0.3px;
+      }
+      .poster-info p {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.7;
+        margin-bottom: 20px;
+      }
+      .poster-specs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-bottom: 20px;
+      }
+      .poster-spec {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        font-weight: 600;
+        background: var(--surface);
+        border: 1px solid var(--border2);
+        color: var(--muted);
+        padding: 4px 10px;
+        border-radius: 20px;
+      }
 
-/* ── FOOTER ── */
-footer{
-  background:var(--bg2);border-top:1px solid var(--border);
-  padding:28px 24px;
-}
-.footer-inner{
-  max-width:1060px;margin:0 auto;
-  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;
-}
-.footer-left{}
-.footer-uni{font-size:14px;font-weight:700;color:var(--text)}
-.footer-dept{font-size:12px;color:var(--muted);margin-top:2px}
-.footer-team{display:flex;flex-wrap:wrap;gap:8px}
-.footer-member{
-  display:flex;align-items:center;gap:7px;
-  background:var(--card-bg);border:1px solid var(--border);
-  border-radius:20px;padding:5px 12px;
-}
-.fm-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.fm-name{font-size:12px;font-weight:600;color:var(--text)}
-.fm-id{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted2)}
-.footer-copy{font-size:11px;color:var(--muted2);text-align:right}
-@media(max-width:640px){.footer-copy{text-align:left}.footer-inner{flex-direction:column}}
+      /* ── FOOTER ── */
+      footer {
+        background: var(--bg2);
+        border-top: 1px solid var(--border);
+        padding: 28px 24px;
+      }
+      .footer-inner {
+        max-width: 1060px;
+        margin: 0 auto;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .footer-left {
+      }
+      .footer-uni {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .footer-dept {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .footer-team {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .footer-member {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 5px 12px;
+      }
+      .fm-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .fm-name {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .fm-id {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        color: var(--muted2);
+      }
+      .footer-copy {
+        font-size: 11px;
+        color: var(--muted2);
+        text-align: right;
+      }
+      @media (max-width: 640px) {
+        .footer-copy {
+          text-align: left;
+        }
+        .footer-inner {
+          flex-direction: column;
+        }
+      }
 
-/* ── RESPONSIVE ── */
-@media(max-width:860px){
-  nav{padding:0 16px}
-  .nav-links{
-    display:none;flex-direction:column;
-    position:fixed;top:60px;left:0;right:0;
-    background:var(--nav-bg);padding:12px 16px;
-    border-bottom:1px solid var(--border);z-index:999;gap:2px;
-  }
-  .nav-links.open{display:flex}
-  .nav-links a{padding:8px 14px;border-radius:8px}
-  .menu-btn{display:flex}
-  section{padding:60px 0}
-  .abstract-box{padding:24px}
-  .poster-box{flex-direction:column}
-  .poster-preview{flex:0 0 auto;width:100%;max-width:280px;margin:0 auto}
-  .hero-stat{min-width:90px;padding:14px 16px}
-  .hero-stat-val{font-size:24px}
-}
-@media(max-width:480px){
-  .hero-title{letter-spacing:-1px}
-  .hero-stats{gap:10px}
-  .tools-grid,.dl-grid{grid-template-columns:1fr}
-  .team-grid{grid-template-columns:1fr}
-  .nav-badge{display:none}
-}
-</style>
-</head>
-<body>
+      /* ── RESPONSIVE ── */
+      @media (max-width: 860px) {
+        nav {
+          padding: 0 16px;
+        }
+        .nav-links {
+          display: none;
+          flex-direction: column;
+          position: fixed;
+          top: 60px;
+          left: 0;
+          right: 0;
+          background: var(--nav-bg);
+          padding: 12px 16px;
+          border-bottom: 1px solid var(--border);
+          z-index: 999;
+          gap: 2px;
+        }
+        .nav-links.open {
+          display: flex;
+        }
+        .nav-links a {
+          padding: 8px 14px;
+          border-radius: 8px;
+        }
+        .menu-btn {
+          display: flex;
+        }
+        section {
+          padding: 60px 0;
+        }
+        .abstract-box {
+          padding: 24px;
+        }
+        .poster-box {
+          flex-direction: column;
+        }
+        .poster-preview {
+          flex: 0 0 auto;
+          width: 100%;
+          max-width: 280px;
+          margin: 0 auto;
+        }
+        .hero-stat {
+          min-width: 90px;
+          padding: 14px 16px;
+        }
+        .hero-stat-val {
+          font-size: 24px;
+        }
+      }
+      @media (max-width: 480px) {
+        .hero-title {
+          letter-spacing: -1px;
+        }
+        .hero-stats {
+          gap: 10px;
+        }
+        .tools-grid,
+        .dl-grid {
+          grid-template-columns: 1fr;
+        }
+        .team-grid {
+          grid-template-columns: 1fr;
+        }
+        .nav-badge {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="prog"></div>
 
-<div id="prog"></div>
-
-<!-- NAV -->
-<nav>
-  <div class="nav-brand">
-    <div class="nav-dot"></div>
-    <span class="nav-title">AI Skin Lesion Detection</span>
-  </div>
-  <ul class="nav-links" id="navLinks">
-    <li><a href="#hero">Home</a></li>
-    <li><a href="#team">Team</a></li>
-    <li><a href="#abstract">Abstract</a></li>
-    <li><a href="#tools">Tools</a></li>
-    <li><a href="#downloads">Downloads</a></li>
-    <li><a href="#video">Demo</a></li>
-    <li><a href="#poster">Poster</a></li>
-  </ul>
-  <div class="nav-right">
-    <span class="nav-badge">FYP 2022–2026</span>
-    <button class="theme-btn" id="themeBtn" title="Toggle theme">🌙</button>
-    <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
-  </div>
-</nav>
-
-<!-- HERO -->
-<section id="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-grid"></div>
-  <div class="hero-content">
-    <h1 class="hero-title">AI-Based <span class="teal">Skin Lesion</span><br><span class="blue">Detection System</span></h1>
-    <p class="hero-subtitle">Real-time edge AI classification of dermoscopic images using ESP32-CAM and Edge Impulse.</p>
-    <div class="hero-tags">
-      <div class="hero-tag"><div class="dot" style="background:var(--teal)"></div>ESP32-CAM · OV2640 · Edge Impulse</div>
-      <div class="hero-tag"><div class="dot" style="background:var(--blue)"></div>HAM10000 Dataset · 2,800 Images</div>
-      <div class="hero-tag"><div class="dot" style="background:var(--amber)"></div>BS Software Engineering · 2022–2026</div>
-    </div>
-    <div class="hero-stats">
-      <div class="hero-stat reveal"><div class="hero-stat-val teal">~84%</div><div class="hero-stat-label">Accuracy</div></div>
-      <div class="hero-stat reveal d1"><div class="hero-stat-val blue">&lt;300ms</div><div class="hero-stat-label">Inference</div></div>
-      <div class="hero-stat reveal d2"><div class="hero-stat-val amber">2,800</div><div class="hero-stat-label">Images</div></div>
-      <div class="hero-stat reveal d3"><div class="hero-stat-val teal">2</div><div class="hero-stat-label">Classes</div></div>
-      <div class="hero-stat reveal d4"><div class="hero-stat-val blue">~75 kb</div><div class="hero-stat-label">Model Size</div></div>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- TEAM -->
-<section id="team">
-  <div class="container">
-    <div class="reveal">
-      <div class="sec-label">The People</div>
-      <h2 class="sec-title">Project Team</h2>
-      <p class="sec-desc">Department of Software Engineering, GCUF — Final Year Project 2022–2026</p>
-    </div>
-    <div class="team-grid">
-      <div class="team-card supervisor reveal d1">
-        <div class="team-avatar sup">UA</div>
-        <div class="team-role sup">Project Supervisor</div>
-        <div class="team-name">Dr. Usama Ahmed</div>
-        <div class="team-id">Faculty · SE Dept.</div>
-        <p class="team-dept">Assistant Professor, Department of Software Engineering, Government College University Faisalabad, Supervisor for the AI-Based Skin Lesion Detection Final Year Project.</p>
+    <!-- NAV -->
+    <nav>
+      <div class="nav-brand">
+        <div class="nav-dot"></div>
+        <span class="nav-title">AI Skin Lesion Detection</span>
       </div>
-      <div class="team-card member reveal d2">
-        <div class="team-avatar mem">RS</div>
-        <div class="team-role mem">Project Member</div>
-        <div class="team-name">Rimsha Shehzadi</div>
-        <div class="team-id">Roll No: 222027</div>
-        <p class="team-dept">BS Software Engineering (2022–2026). Contributed to AI/ML pipeline, dataset preprocessing, Edge Impulse training, and firmware development.</p>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#hero">Home</a></li>
+        <li><a href="#team">Team</a></li>
+        <li><a href="#abstract">Abstract</a></li>
+        <li><a href="#tools">Tools</a></li>
+        <li><a href="#downloads">Downloads</a></li>
+        <li><a href="#video">Demo</a></li>
+        <li><a href="#poster">Poster</a></li>
+      </ul>
+      <div class="nav-right">
+        <span class="nav-badge">FYP 2022–2026</span>
+        <button class="theme-btn" id="themeBtn" title="Toggle theme">🌙</button>
+        <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
       </div>
-      <div class="team-card member reveal d3">
-        <div class="team-avatar mem">IW</div>
-        <div class="team-role mem">Project Member</div>
-        <div class="team-name">Iqra Waheed</div>
-        <div class="team-id">Roll No: 221982</div>
-        <p class="team-dept">BS Software Engineering (2022–2026). Contributed to web dashboard development, system testing, hardware integration, and documentation.</p>
-      </div>
-    </div>
-  </div>
-</section>
+    </nav>
 
-<div class="divider"></div>
-
-<!-- ABSTRACT -->
-<section id="abstract">
-  <div class="container">
-    <div class="reveal">
-      <div class="sec-label">Project Description</div>
-      <h2 class="sec-title">Abstract</h2>
-      <p class="sec-desc">What this project is, why it matters, and what we built.</p>
-    </div>
-    <div class="abstract-box reveal">
-      <div class="abstract-text">
-        <p>Skin diseases affect nearly <strong>900 million people globally</strong>, yet qualified dermatological expertise remains severely limited in developing countries such as Pakistan — a nation of 230 million with fewer than 500 registered dermatologists. This Final Year Project presents the design, development, and deployment of a fully embedded, real-time AI system for skin lesion classification, implemented on the <strong>ESP32-CAM microcontroller</strong> — requiring no cloud connectivity and costing under PKR 1,500.</p>
-        <p>The system leverages a curated subset of the <strong>HAM10000 dermoscopic dataset</strong> (~2,800 images), training a <strong>FOMO (Faster Objects, More Objects)</strong> neural network with MobileNetV2 backbone and Int8 quantisation via the Edge Impulse platform. The deployed model classifies lesions as either <strong>Melanocytic Nevi (NEVUS)</strong> or <strong>Basal Cell Carcinoma (BCC)</strong> with over 83% accuracy at under 300 ms per inference, entirely on-device.</p>
-        <p>A comprehensive <strong>browser-based web dashboard</strong> is served directly from the ESP32 over local Wi-Fi, displaying a live camera preview, a gallery of captured images labelled by disease name, stats and CSV export. The system runs on a standard USB power bank, and is deployable by community health workers in the most resource-constrained environments.</p>
-      </div>
-      <div class="keywords">
-        <span class="kw">ESP32-CAM</span><span class="kw">Edge Impulse</span><span class="kw">HAM10000</span>
-        <span class="kw">FOMO Architecture</span><span class="kw">MobileNetV2</span><span class="kw">Int8 Quantisation</span>
-        <span class="kw">Skin Lesion Detection</span><span class="kw">Basal Cell Carcinoma</span>
-        <span class="kw">Melanocytic Nevi</span><span class="kw">Embedded AI</span>
-        <span class="kw">TensorFlow Lite Micro</span><span class="kw">Edge Computing</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- TOOLS -->
-<section id="tools">
-  <div class="container">
-    <div class="reveal">
-      <div class="sec-label">Technologies</div>
-      <h2 class="sec-title">Tools & Technologies</h2>
-      <p class="sec-desc">The complete tech stack powering this embedded AI system from data to deployment.</p>
-    </div>
-    <div class="tools-grid">
-      <div class="tool-card reveal d1">
-        <div class="tool-top">
-          <div class="tool-icon" style="background:rgba(0,210,180,0.1)">🤖</div>
-          <span class="tool-badge" style="background:rgba(0,210,180,0.1);color:var(--teal);border:1px solid rgba(0,210,180,0.22)">ML Platform</span>
+    <!-- HERO -->
+    <section id="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-grid"></div>
+      <div class="hero-content">
+        <h1 class="hero-title">
+          AI-Based <span class="teal">Skin Lesion</span><br /><span class="blue"
+            >Detection System</span
+          >
+        </h1>
+        <p class="hero-subtitle">
+          Real-time edge AI classification of dermoscopic images using ESP32-CAM
+          and Edge Impulse.
+        </p>
+        <div class="hero-tags">
+          <div class="hero-tag">
+            <div class="dot" style="background: var(--teal)"></div>
+            ESP32-CAM · OV2640 · Edge Impulse
+          </div>
+          <div class="hero-tag">
+            <div class="dot" style="background: var(--blue)"></div>
+            HAM10000 Dataset · 2,800 Images
+          </div>
+          <div class="hero-tag">
+            <div class="dot" style="background: var(--amber)"></div>
+            BS Software Engineering · 2022–2026
+          </div>
         </div>
-        <div class="tool-name">Edge Impulse</div>
-        <div class="tool-desc">Cloud ML platform for training, optimising, and exporting FOMO models as Arduino libraries for embedded deployment.</div>
-      </div>
-      <div class="tool-card reveal d2">
-        <div class="tool-top">
-          <div class="tool-icon" style="background:rgba(59,130,246,0.1)">📷</div>
-          <span class="tool-badge" style="background:rgba(59,130,246,0.1);color:var(--blue);border:1px solid rgba(59,130,246,0.22)">Hardware</span>
+        <div class="hero-stats">
+          <div class="hero-stat reveal">
+            <div class="hero-stat-val teal">~84%</div>
+            <div class="hero-stat-label">Accuracy</div>
+          </div>
+          <div class="hero-stat reveal d1">
+            <div class="hero-stat-val blue">&lt;300ms</div>
+            <div class="hero-stat-label">Inference</div>
+          </div>
+          <div class="hero-stat reveal d2">
+            <div class="hero-stat-val amber">2,800</div>
+            <div class="hero-stat-label">Images</div>
+          </div>
+          <div class="hero-stat reveal d3">
+            <div class="hero-stat-val teal">2</div>
+            <div class="hero-stat-label">Classes</div>
+          </div>
+          <div class="hero-stat reveal d4">
+            <div class="hero-stat-val blue">~75 kb</div>
+            <div class="hero-stat-label">Model Size</div>
+          </div>
         </div>
-        <div class="tool-name">ESP32-CAM</div>
-        <div class="tool-desc">Dual-core 240 MHz SoC with 4 MB PSRAM, OV2640 2 MP camera, and built-in Wi-Fi. Entire inference runs on this chip.</div>
       </div>
-      <div class="tool-card reveal d3">
-        <div class="tool-top">
-          <div class="tool-icon" style="background:rgba(56,189,248,0.1)">⚡</div>
-          <span class="tool-badge" style="background:rgba(56,189,248,0.1);color:#38bdf8;border:1px solid rgba(56,189,248,0.22)">IDE</span>
-        </div>
-        <div class="tool-name">Arduino IDE</div>
-        <div class="tool-desc">Firmware development, compilation, and UART upload for ESP32-CAM with full OV2640 camera and Wi-Fi stack control.</div>
-      </div>
-      <div class="tool-card reveal d1">
-        <div class="tool-top">
-          <div class="tool-icon" style="background:rgba(245,158,11,0.1)">🧬</div>
-          <span class="tool-badge" style="background:rgba(245,158,11,0.1);color:var(--amber);border:1px solid rgba(245,158,11,0.22)">Dataset</span>
-        </div>
-        <div class="tool-name">HAM10000</div>
-        <div class="tool-desc">10,015 dermoscopic images across 7 classes. Project uses ~2,800 images (NV + BCC) validated by histopathology.</div>
-      </div>
-      <div class="tool-card reveal d2">
-        <div class="tool-top">
-          <div class="tool-icon" style="background:rgba(139,92,246,0.1)">🧠</div>
-          <span class="tool-badge" style="background:rgba(139,92,246,0.1);color:var(--purple);border:1px solid rgba(139,92,246,0.22)">Model</span>
-        </div>
-        <div class="tool-name">MobileNetV2 / FOMO</div>
-        <div class="tool-desc">Lightweight CNN with depthwise separable convolutions. Int8 quantised to 75 KB — fits ESP32 memory budget.</div>
-      </div>
-      <div class="tool-card reveal d3">
-        <div class="tool-top">
-          <div class="tool-icon" style="background:rgba(239,68,68,0.1)">🌐</div>
-          <span class="tool-badge" style="background:rgba(239,68,68,0.1);color:var(--red);border:1px solid rgba(239,68,68,0.22)">Web</span>
-        </div>
-        <div class="tool-name">HTML / CSS / JS</div>
-        <div class="tool-desc">Single-page dashboard served from ESP32 HTTP server. Live camera, image gallery, stats and CSV export.</div>
-      </div>
-      <div class="tool-card reveal d1">
-        <div class="tool-top">
-          <div class="tool-icon" style="background:rgba(34,197,94,0.1)">🐍</div>
-          <span class="tool-badge" style="background:rgba(34,197,94,0.1);color:#4ade80;border:1px solid rgba(34,197,94,0.22)">Data Science</span>
-        </div>
-        <div class="tool-name">Python + Pandas</div>
-        <div class="tool-desc">Dataset preprocessing, EDA, class distribution visualisation, image resizing pipeline, and train/test split.</div>
-      </div>
-      <div class="tool-card reveal d2">
-        <div class="tool-top">
-          <div class="tool-icon" style="background:rgba(20,184,166,0.1)">🔢</div>
-          <span class="tool-badge" style="background:rgba(20,184,166,0.1);color:#2dd4bf;border:1px solid rgba(20,184,166,0.22)">Runtime</span>
-        </div>
-        <div class="tool-name">TF Lite Micro</div>
-        <div class="tool-desc">TensorFlow Lite Micro runtime inside the Edge Impulse Arduino library — neural network inference directly on ESP32.</div>
-      </div>
-      <div class="tool-card reveal d3">
-        <div class="tool-top">
-          <div class="tool-icon" style="background:rgba(251,191,36,0.1)">🐙</div>
-          <span class="tool-badge" style="background:rgba(251,191,36,0.1);color:#fbbf24;border:1px solid rgba(251,191,36,0.22)">Version Control</span>
-        </div>
-        <div class="tool-name">GitHub</div>
-        <div class="tool-desc">Full source code, firmware, preprocessing scripts, and documentation hosted publicly for reproducibility.</div>
-      </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<div class="divider"></div>
+    <div class="divider"></div>
 
-<!-- DOWNLOADS -->
-<section id="downloads">
-  <div class="container">
-    <div class="reveal">
-      <div class="sec-label">Resources</div>
-      <h2 class="sec-title">Downloads & Links</h2>
-      <p class="sec-desc">All project resources — report, code, poster, and tools — in one place.</p>
-    </div>
-    <div class="dl-grid">
-      <div class="dl-card reveal d1" style="--lc:var(--blue)">
-        <div class="dl-icon" style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2)">📄</div>
-        <div class="dl-type" style="color:var(--blue)">Documentation</div>
-        <div class="dl-title">Project Report</div>
-        <div class="dl-desc">Full FYP report covering background, SRS, dataset analysis, model architecture, deployment, results, and future work. ~50 pages.</div>
-        <a href="YOUR_REPORT_LINK_HERE.docx" class="dl-btn" style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.25);color:var(--blue)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Download Report (.docx)
-        </a>
+    <!-- TEAM -->
+    <section id="team">
+      <div class="container">
+        <div class="reveal">
+          <div class="sec-label">The People</div>
+          <h2 class="sec-title">Project Team</h2>
+          <p class="sec-desc">
+            Department of Software Engineering, GCUF — Final Year Project
+            2022–2026
+          </p>
+        </div>
+        <div class="team-grid">
+          <div class="team-card supervisor reveal d1">
+            <div class="team-avatar sup">UA</div>
+            <div class="team-role sup">Project Supervisor</div>
+            <div class="team-name">Dr. Usama Ahmed</div>
+            <div class="team-id">Faculty · SE Dept.</div>
+            <p class="team-dept">
+              Assistant Professor, Department of Software Engineering,
+              Government College University Faisalabad, Supervisor for the
+              AI-Based Skin Lesion Detection Final Year Project.
+            </p>
+          </div>
+          <div class="team-card member reveal d2">
+            <div class="team-avatar mem">RS</div>
+            <div class="team-role mem">Project Member</div>
+            <div class="team-name">Rimsha Shehzadi</div>
+            <div class="team-id">Roll No: 222027</div>
+            <p class="team-dept">
+              BS Software Engineering (2022–2026). Responsible for AI/ML
+              components: Metadata analysis & EDA
+              scripts, dataset balancing pipeline (undersampling &
+              augmentation), Edge Impulse design/training/evaluation, prototype
+              model development, core firmware (camera init, inference, output
+              modules) and documentation.
+            </p>
+          </div>
+          <div class="team-card member reveal d3">
+            <div class="team-avatar mem">IW</div>
+            <div class="team-role mem">Project Member</div>
+            <div class="team-name">Iqra Waheed</div>
+            <div class="team-id">Roll No: 221982</div>
+            <p class="team-dept">
+              BS Software Engineering (2022–2026). Responsible for system &
+              interface components: HAM10000 dataset acquisition, web dashboard (HTML/CSS/JS), HTTP server &
+              MJPEG streaming integration, Chart.js & CSV export, full system
+              testing (all 12 test cases) and performance evaluation.
+            </p>
+          </div>
+        </div>
       </div>
-      <div class="dl-card reveal d2" style="--lc:var(--teal)">
-        <div class="dl-icon" style="background:rgba(0,210,180,0.1);border:1px solid rgba(0,210,180,0.2)">🐙</div>
-        <div class="dl-type" style="color:var(--teal)">Source Code</div>
-        <div class="dl-title">GitHub Repository</div>
-        <div class="dl-desc">Complete project source: ESP32-CAM firmware, Python preprocessing scripts, Edge Impulse model files, and web dashboard code.</div>
-        <a href="https://github.com/YOUR_USERNAME/YOUR_REPO" target="_blank" rel="noopener" class="dl-btn" style="background:rgba(0,210,180,0.09);border:1px solid rgba(0,210,180,0.25);color:var(--teal)">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/></svg>
-          View on GitHub
-        </a>
-      </div>
-      <div class="dl-card reveal d3" style="--lc:var(--amber)">
-        <div class="dl-icon" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2)">🖼️</div>
-        <div class="dl-type" style="color:var(--amber)">Visual Summary</div>
-        <div class="dl-title">Project Poster</div>
-        <div class="dl-desc">A3 infographic poster summarising the system pipeline, dataset stats, accuracy metrics, and web dashboard overview.</div>
-        <a href="YOUR_POSTER_FILE_LINK_HERE.png" class="dl-btn" style="background:rgba(245,158,11,0.09);border:1px solid rgba(245,158,11,0.25);color:var(--amber)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Download Poster (.png)
-        </a>
-      </div>
-      <div class="dl-card reveal d1" style="--lc:var(--purple)">
-        <div class="dl-icon" style="background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.2)">⚡</div>
-        <div class="dl-type" style="color:var(--purple)">Development Tool</div>
-        <div class="dl-title">Arduino IDE</div>
-        <div class="dl-desc">Required to compile and flash the ESP32-CAM firmware. Use with ESP32 board support package and 'Huge APP' partition scheme.</div>
-        <a href="https://www.arduino.cc/en/software" target="_blank" rel="noopener" class="dl-btn" style="background:rgba(139,92,246,0.09);border:1px solid rgba(139,92,246,0.25);color:var(--purple)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          Download Arduino IDE
-        </a>
-      </div>
-      <div class="dl-card reveal d2" style="--lc:var(--red)">
-        <div class="dl-icon" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2)">🤖</div>
-        <div class="dl-type" style="color:var(--red)">ML Platform</div>
-        <div class="dl-title">Edge Impulse Studio</div>
-        <div class="dl-desc">The ML training platform used to build, train, and export the FOMO skin lesion model. Free tier supports this project end-to-end.</div>
-        <a href="https://studio.edgeimpulse.com" target="_blank" rel="noopener" class="dl-btn" style="background:rgba(239,68,68,0.09);border:1px solid rgba(239,68,68,0.25);color:var(--red)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          Open Edge Impulse
-        </a>
-      </div>
-      <div class="dl-card reveal d3" style="--lc:#4ade80">
-        <div class="dl-icon" style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2)">🧬</div>
-        <div class="dl-type" style="color:#4ade80">Training Data</div>
-        <div class="dl-title">HAM10000 Dataset</div>
-        <div class="dl-desc">10,015 dermoscopic images across 7 disease classes, hosted on Harvard Dataverse. Free access for research use.</div>
-        <a href="https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/DBW86T" target="_blank" rel="noopener" class="dl-btn" style="background:rgba(34,197,94,0.09);border:1px solid rgba(34,197,94,0.25);color:#4ade80">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          Access Dataset
-        </a>
-      </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<div class="divider"></div>
+    <div class="divider"></div>
 
-<!-- VIDEO -->
-<section id="video">
-  <div class="container">
-    <div class="reveal">
-      <div class="sec-label">Project Demo</div>
-      <h2 class="sec-title">Demo Video</h2>
-      <p class="sec-desc">Watch the system in action — live classification, web dashboard, and serial output.</p>
-    </div>
-    <div class="video-wrap reveal">
-      <!-- Uncomment and replace YOUR_VIDEO_ID to embed YouTube:
+    <!-- ABSTRACT -->
+    <section id="abstract">
+      <div class="container">
+        <div class="reveal">
+          <div class="sec-label">Project Description</div>
+          <h2 class="sec-title">Abstract</h2>
+          <p class="sec-desc">
+            What this project is, why it matters, and what we built.
+          </p>
+        </div>
+        <div class="abstract-box reveal">
+          <div class="abstract-text">
+            <p>
+              Skin diseases affect nearly
+              <strong>900 million people globally</strong>, yet qualified
+              dermatological expertise remains severely limited in developing
+              countries such as Pakistan — a nation of 230 million with fewer
+              than 500 registered dermatologists. This Final Year Project
+              presents the design, development, and deployment of a fully
+              embedded, real-time AI system for skin lesion classification,
+              implemented on the <strong>ESP32-CAM microcontroller</strong> —
+              requiring no cloud connectivity and costing under PKR 1,500.
+            </p>
+            <p>
+              The system leverages a curated subset of the
+              <strong>HAM10000 dermoscopic dataset</strong> (~2,800 images),
+              training a
+              <strong>FOMO (Faster Objects, More Objects)</strong> neural
+              network with MobileNetV2 backbone and Int8 quantisation via the
+              Edge Impulse platform. The deployed model classifies lesions as
+              either <strong>Melanocytic Nevi (NEVUS)</strong> or
+              <strong>Basal Cell Carcinoma (BCC)</strong> with over 83% accuracy
+              at under 300 ms per inference, entirely on-device.
+            </p>
+            <p>
+              A comprehensive <strong>browser-based web dashboard</strong> is
+              served directly from the ESP32 over local Wi-Fi, displaying a live
+              camera preview, a gallery of captured images labelled by disease
+              name, stats and CSV export. The system runs on a standard USB
+              power bank, and is deployable by community health workers in the
+              most resource-constrained environments.
+            </p>
+          </div>
+          <div class="keywords">
+            <span class="kw">ESP32-CAM</span><span class="kw">Edge Impulse</span
+            ><span class="kw">HAM10000</span>
+            <span class="kw">FOMO Architecture</span
+            ><span class="kw">MobileNetV2</span
+            ><span class="kw">Int8 Quantisation</span>
+            <span class="kw">Skin Lesion Detection</span
+            ><span class="kw">Basal Cell Carcinoma</span>
+            <span class="kw">Melanocytic Nevi</span
+            ><span class="kw">Embedded AI</span>
+            <span class="kw">TensorFlow Lite Micro</span
+            ><span class="kw">Edge Computing</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- TOOLS -->
+    <section id="tools">
+      <div class="container">
+        <div class="reveal">
+          <div class="sec-label">Technologies</div>
+          <h2 class="sec-title">Tools & Technologies</h2>
+          <p class="sec-desc">
+            The complete tech stack powering this embedded AI system from data
+            to deployment.
+          </p>
+        </div>
+        <div class="tools-grid">
+          <div class="tool-card reveal d1">
+            <div class="tool-top">
+              <div class="tool-icon" style="background: rgba(0, 210, 180, 0.1)">
+                🤖
+              </div>
+              <span
+                class="tool-badge"
+                style="
+                  background: rgba(0, 210, 180, 0.1);
+                  color: var(--teal);
+                  border: 1px solid rgba(0, 210, 180, 0.22);
+                "
+                >ML Platform</span
+              >
+            </div>
+            <div class="tool-name">Edge Impulse</div>
+            <div class="tool-desc">
+              Cloud ML platform for training, optimising, and exporting FOMO
+              models as Arduino libraries for embedded deployment.
+            </div>
+          </div>
+          <div class="tool-card reveal d2">
+            <div class="tool-top">
+              <div
+                class="tool-icon"
+                style="background: rgba(59, 130, 246, 0.1)"
+              >
+                📷
+              </div>
+              <span
+                class="tool-badge"
+                style="
+                  background: rgba(59, 130, 246, 0.1);
+                  color: var(--blue);
+                  border: 1px solid rgba(59, 130, 246, 0.22);
+                "
+                >Hardware</span
+              >
+            </div>
+            <div class="tool-name">ESP32-CAM</div>
+            <div class="tool-desc">
+              Dual-core 240 MHz SoC with 4 MB PSRAM, OV2640 2 MP camera, and
+              built-in Wi-Fi. Entire inference runs on this chip.
+            </div>
+          </div>
+          <div class="tool-card reveal d3">
+            <div class="tool-top">
+              <div
+                class="tool-icon"
+                style="background: rgba(56, 189, 248, 0.1)"
+              >
+                ⚡
+              </div>
+              <span
+                class="tool-badge"
+                style="
+                  background: rgba(56, 189, 248, 0.1);
+                  color: #38bdf8;
+                  border: 1px solid rgba(56, 189, 248, 0.22);
+                "
+                >IDE</span
+              >
+            </div>
+            <div class="tool-name">Arduino IDE</div>
+            <div class="tool-desc">
+              Firmware development, compilation, and UART upload for ESP32-CAM
+              with full OV2640 camera and Wi-Fi stack control.
+            </div>
+          </div>
+          <div class="tool-card reveal d1">
+            <div class="tool-top">
+              <div
+                class="tool-icon"
+                style="background: rgba(245, 158, 11, 0.1)"
+              >
+                🧬
+              </div>
+              <span
+                class="tool-badge"
+                style="
+                  background: rgba(245, 158, 11, 0.1);
+                  color: var(--amber);
+                  border: 1px solid rgba(245, 158, 11, 0.22);
+                "
+                >Dataset</span
+              >
+            </div>
+            <div class="tool-name">HAM10000</div>
+            <div class="tool-desc">
+              10,015 dermoscopic images across 7 classes. Project uses ~2,800
+              images (NV + BCC) validated by histopathology.
+            </div>
+          </div>
+          <div class="tool-card reveal d2">
+            <div class="tool-top">
+              <div
+                class="tool-icon"
+                style="background: rgba(139, 92, 246, 0.1)"
+              >
+                🧠
+              </div>
+              <span
+                class="tool-badge"
+                style="
+                  background: rgba(139, 92, 246, 0.1);
+                  color: var(--purple);
+                  border: 1px solid rgba(139, 92, 246, 0.22);
+                "
+                >Model</span
+              >
+            </div>
+            <div class="tool-name">MobileNetV2 / FOMO</div>
+            <div class="tool-desc">
+              Lightweight CNN with depthwise separable convolutions. Int8
+              quantised to 75 KB — fits ESP32 memory budget.
+            </div>
+          </div>
+          <div class="tool-card reveal d3">
+            <div class="tool-top">
+              <div class="tool-icon" style="background: rgba(239, 68, 68, 0.1)">
+                🌐
+              </div>
+              <span
+                class="tool-badge"
+                style="
+                  background: rgba(239, 68, 68, 0.1);
+                  color: var(--red);
+                  border: 1px solid rgba(239, 68, 68, 0.22);
+                "
+                >Web</span
+              >
+            </div>
+            <div class="tool-name">HTML / CSS / JS</div>
+            <div class="tool-desc">
+              Single-page dashboard served from ESP32 HTTP server. Live camera,
+              image gallery, stats and CSV export.
+            </div>
+          </div>
+          <div class="tool-card reveal d1">
+            <div class="tool-top">
+              <div class="tool-icon" style="background: rgba(34, 197, 94, 0.1)">
+                🐍
+              </div>
+              <span
+                class="tool-badge"
+                style="
+                  background: rgba(34, 197, 94, 0.1);
+                  color: #4ade80;
+                  border: 1px solid rgba(34, 197, 94, 0.22);
+                "
+                >Data Science</span
+              >
+            </div>
+            <div class="tool-name">Python + Pandas</div>
+            <div class="tool-desc">
+              Dataset preprocessing, EDA, class distribution visualisation,
+              image resizing pipeline, and train/test split.
+            </div>
+          </div>
+          <div class="tool-card reveal d2">
+            <div class="tool-top">
+              <div
+                class="tool-icon"
+                style="background: rgba(20, 184, 166, 0.1)"
+              >
+                🔢
+              </div>
+              <span
+                class="tool-badge"
+                style="
+                  background: rgba(20, 184, 166, 0.1);
+                  color: #2dd4bf;
+                  border: 1px solid rgba(20, 184, 166, 0.22);
+                "
+                >Runtime</span
+              >
+            </div>
+            <div class="tool-name">TF Lite Micro</div>
+            <div class="tool-desc">
+              TensorFlow Lite Micro runtime inside the Edge Impulse Arduino
+              library — neural network inference directly on ESP32.
+            </div>
+          </div>
+          <div class="tool-card reveal d3">
+            <div class="tool-top">
+              <div
+                class="tool-icon"
+                style="background: rgba(251, 191, 36, 0.1)"
+              >
+                🐙
+              </div>
+              <span
+                class="tool-badge"
+                style="
+                  background: rgba(251, 191, 36, 0.1);
+                  color: #fbbf24;
+                  border: 1px solid rgba(251, 191, 36, 0.22);
+                "
+                >Version Control</span
+              >
+            </div>
+            <div class="tool-name">GitHub</div>
+            <div class="tool-desc">
+              Full source code, firmware, preprocessing scripts, and
+              documentation hosted publicly for reproducibility.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- DOWNLOADS -->
+    <section id="downloads">
+      <div class="container">
+        <div class="reveal">
+          <div class="sec-label">Resources</div>
+          <h2 class="sec-title">Downloads & Links</h2>
+          <p class="sec-desc">
+            All project resources — report, code, poster, and tools — in one
+            place.
+          </p>
+        </div>
+        <div class="dl-grid">
+          <div class="dl-card reveal d1" style="--lc: var(--blue)">
+            <div
+              class="dl-icon"
+              style="
+                background: rgba(59, 130, 246, 0.1);
+                border: 1px solid rgba(59, 130, 246, 0.2);
+              "
+            >
+              📄
+            </div>
+            <div class="dl-type" style="color: var(--blue)">Documentation</div>
+            <div class="dl-title">Project Report</div>
+            <div class="dl-desc">
+              Full FYP report covering background, SRS, dataset analysis, model
+              architecture, deployment, results, and future work. ~50 pages.
+            </div>
+            <a
+              href="https://docs.google.com/document/d/1_GzSJhBL8Ai3SZYeBl9_zC7wtAxUoU06/edit?usp=sharing&ouid=100044654824133958358&rtpof=true&sd=true"
+              class="dl-btn"
+              style="
+                background: rgba(59, 130, 246, 0.1);
+                border: 1px solid rgba(59, 130, 246, 0.25);
+                color: var(--blue);
+              "
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              Download Report (.docx)
+            </a>
+          </div>
+          <div class="dl-card reveal d2" style="--lc: var(--teal)">
+            <div
+              class="dl-icon"
+              style="
+                background: rgba(0, 210, 180, 0.1);
+                border: 1px solid rgba(0, 210, 180, 0.2);
+              "
+            >
+              🐙
+            </div>
+            <div class="dl-type" style="color: var(--teal)">Source Code</div>
+            <div class="dl-title">GitHub Repository</div>
+            <div class="dl-desc">
+              Complete project source: ESP32-CAM firmware, Python preprocessing
+              scripts, Edge Impulse model files, and web dashboard code.
+            </div>
+            <a
+              href="https://github.com/YOUR_USERNAME/YOUR_REPO"
+              target="_blank"
+              rel="noopener"
+              class="dl-btn"
+              style="
+                background: rgba(0, 210, 180, 0.09);
+                border: 1px solid rgba(0, 210, 180, 0.25);
+                color: var(--teal);
+              "
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"
+                />
+              </svg>
+              View on GitHub
+            </a>
+          </div>
+          <div class="dl-card reveal d3" style="--lc: var(--amber)">
+            <div
+              class="dl-icon"
+              style="
+                background: rgba(245, 158, 11, 0.1);
+                border: 1px solid rgba(245, 158, 11, 0.2);
+              "
+            >
+              🖼️
+            </div>
+            <div class="dl-type" style="color: var(--amber)">
+              Visual Summary
+            </div>
+            <div class="dl-title">Project Poster</div>
+            <div class="dl-desc">
+              A3 infographic poster summarising the system pipeline, dataset
+              stats, accuracy metrics, and web dashboard overview.
+            </div>
+            <a
+              href="YOUR_POSTER_FILE_LINK_HERE.png"
+              class="dl-btn"
+              style="
+                background: rgba(245, 158, 11, 0.09);
+                border: 1px solid rgba(245, 158, 11, 0.25);
+                color: var(--amber);
+              "
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              Download Poster (.png)
+            </a>
+          </div>
+          <div class="dl-card reveal d1" style="--lc: var(--purple)">
+            <div
+              class="dl-icon"
+              style="
+                background: rgba(139, 92, 246, 0.1);
+                border: 1px solid rgba(139, 92, 246, 0.2);
+              "
+            >
+              ⚡
+            </div>
+            <div class="dl-type" style="color: var(--purple)">
+              Development Tool
+            </div>
+            <div class="dl-title">Arduino IDE</div>
+            <div class="dl-desc">
+              Required to compile and flash the ESP32-CAM firmware. Use with
+              ESP32 board support package and 'Huge APP' partition scheme.
+            </div>
+            <a
+              href="https://www.arduino.cc/en/software"
+              target="_blank"
+              rel="noopener"
+              class="dl-btn"
+              style="
+                background: rgba(139, 92, 246, 0.09);
+                border: 1px solid rgba(139, 92, 246, 0.25);
+                color: var(--purple);
+              "
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+                />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+              Download Arduino IDE
+            </a>
+          </div>
+          <div class="dl-card reveal d2" style="--lc: var(--red)">
+            <div
+              class="dl-icon"
+              style="
+                background: rgba(239, 68, 68, 0.1);
+                border: 1px solid rgba(239, 68, 68, 0.2);
+              "
+            >
+              🤖
+            </div>
+            <div class="dl-type" style="color: var(--red)">ML Platform</div>
+            <div class="dl-title">Edge Impulse Studio</div>
+            <div class="dl-desc">
+              The ML training platform used to build, train, and export the FOMO
+              skin lesion model. Free tier supports this project end-to-end.
+            </div>
+            <a
+              href="https://studio.edgeimpulse.com"
+              target="_blank"
+              rel="noopener"
+              class="dl-btn"
+              style="
+                background: rgba(239, 68, 68, 0.09);
+                border: 1px solid rgba(239, 68, 68, 0.25);
+                color: var(--red);
+              "
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+                />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+              Open Edge Impulse
+            </a>
+          </div>
+          <div class="dl-card reveal d3" style="--lc: #4ade80">
+            <div
+              class="dl-icon"
+              style="
+                background: rgba(34, 197, 94, 0.1);
+                border: 1px solid rgba(34, 197, 94, 0.2);
+              "
+            >
+              🧬
+            </div>
+            <div class="dl-type" style="color: #4ade80">Training Data</div>
+            <div class="dl-title">HAM10000 Dataset</div>
+            <div class="dl-desc">
+              10,015 dermoscopic images across 7 disease classes, hosted on
+              Harvard Dataverse. Free access for research use.
+            </div>
+            <a
+              href="https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/DBW86T"
+              target="_blank"
+              rel="noopener"
+              class="dl-btn"
+              style="
+                background: rgba(34, 197, 94, 0.09);
+                border: 1px solid rgba(34, 197, 94, 0.25);
+                color: #4ade80;
+              "
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+                />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+              Access Dataset
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- VIDEO -->
+    <section id="video">
+      <div class="container">
+        <div class="reveal">
+          <div class="sec-label">Project Demo</div>
+          <h2 class="sec-title">Demo Video</h2>
+          <p class="sec-desc">
+            Watch the system in action — live classification, web dashboard, and
+            serial output.
+          </p>
+        </div>
+        <div class="video-wrap reveal">
+          <!-- Uncomment and replace YOUR_VIDEO_ID to embed YouTube:
       <iframe width="100%" style="aspect-ratio:16/9;display:block;border:none;"
         src="https://www.youtube.com/embed/YOUR_VIDEO_ID"
         title="Project Demo" allowfullscreen></iframe>
       -->
-      <div class="video-placeholder">
-        <div class="play-btn">
-          <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+          <div class="video-placeholder">
+            <div class="play-btn">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5,3 19,12 5,21" />
+              </svg>
+            </div>
+            <div class="video-label">
+              <strong>Project Demo Video</strong>
+              <!-- Paste your YouTube embed link in the iframe above
+          <code>&lt;!-- Replace YOUR_VIDEO_ID --&gt;</code> -->
+            </div>
+          </div>
         </div>
-        <div class="video-label">
-          <strong>Project Demo Video</strong>
-          Paste your YouTube embed link in the iframe above
-          <code>&lt;!-- Replace YOUR_VIDEO_ID --&gt;</code>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- POSTER -->
+    <section id="poster">
+      <div class="container">
+        <div class="reveal">
+          <div class="sec-label">Visual Summary</div>
+          <h2 class="sec-title">Project Poster</h2>
+          <p class="sec-desc">
+            A one-page visual overview of the entire project — pipeline,
+            results, and team.
+          </p>
+        </div>
+        <div class="poster-box reveal">
+          <div class="poster-preview">
+            <svg
+              viewBox="0 0 48 48"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            >
+              <rect x="6" y="3" width="36" height="42" rx="3" />
+              <line x1="13" y1="12" x2="35" y2="12" />
+              <line x1="13" y1="18" x2="35" y2="18" />
+              <line x1="13" y1="24" x2="28" y2="24" />
+              <rect x="13" y="30" width="22" height="8" rx="2" />
+            </svg>
+            <span>Poster image here</span>
+            <!-- <span style="font-size:11px">Replace div with &lt;img&gt; tag</span> -->
+          </div>
+          <div class="poster-info">
+            <h3>AI Skin Lesion Detection — Project Poster</h3>
+            <p>
+              The project poster provides a comprehensive single-page visual
+              summary including the system pipeline, HAM10000 dataset
+              distribution charts, model accuracy metrics, team details, and
+              university information. Designed for academic presentation and
+              conference display.
+            </p>
+            <div class="poster-specs">
+              <span class="poster-spec">Dark theme</span>
+              <span class="poster-spec">HAM10000 charts</span>
+              <span class="poster-spec">Accuracy metrics</span>
+              <span class="poster-spec">System pipeline</span>
+              <span class="poster-spec">Web dashboard preview</span>
+            </div>
+            <a
+              href="YOUR_POSTER_FILE_LINK_HERE.png"
+              class="dl-btn"
+              style="
+                max-width: 200px;
+                background: rgba(0, 210, 180, 0.09);
+                border: 1px solid rgba(0, 210, 180, 0.25);
+                color: var(--teal);
+              "
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                style="width: 14px; height: 14px"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              Download Poster
+            </a>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<div class="divider"></div>
+    <div class="divider"></div>
 
-<!-- POSTER -->
-<section id="poster">
-  <div class="container">
-    <div class="reveal">
-      <div class="sec-label">Visual Summary</div>
-      <h2 class="sec-title">Project Poster</h2>
-      <p class="sec-desc">A one-page visual overview of the entire project — pipeline, results, and team.</p>
-    </div>
-    <div class="poster-box reveal">
-      <div class="poster-preview">
-        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-          <rect x="6" y="3" width="36" height="42" rx="3"/>
-          <line x1="13" y1="12" x2="35" y2="12"/><line x1="13" y1="18" x2="35" y2="18"/>
-          <line x1="13" y1="24" x2="28" y2="24"/><rect x="13" y="30" width="22" height="8" rx="2"/>
-        </svg>
-        <span>Paste your poster image here</span>
-        <span style="font-size:11px">Replace div with &lt;img&gt; tag</span>
-      </div>
-      <div class="poster-info">
-        <h3>AI Skin Lesion Detection — Project Poster</h3>
-        <p>The project poster provides a comprehensive single-page visual summary including the system pipeline, HAM10000 dataset distribution charts, model accuracy metrics, team details, and university information. Designed for academic presentation and conference display.</p>
-        <div class="poster-specs">
-          <span class="poster-spec">Dark theme</span>
-          <span class="poster-spec">HAM10000 charts</span>
-          <span class="poster-spec">Accuracy metrics</span>
-          <span class="poster-spec">System pipeline</span>
-          <span class="poster-spec">Web dashboard preview</span>
+    <!-- FOOTER -->
+    <footer>
+      <div class="footer-inner">
+        <div class="footer-left">
+          <div class="footer-uni">Government College University Faisalabad</div>
+          <div class="footer-dept">
+            Dept. of Software Engineering · FYP 2022–2026 · AI-Based Skin Lesion
+            Detection
+          </div>
         </div>
-        <a href="YOUR_POSTER_FILE_LINK_HERE.png" class="dl-btn" style="max-width:200px;background:rgba(0,210,180,0.09);border:1px solid rgba(0,210,180,0.25);color:var(--teal)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Download Poster
-        </a>
+        <div class="footer-team">
+          <div class="footer-member">
+            <div class="fm-dot" style="background: var(--amber)"></div>
+            <div>
+              <div class="fm-name">Dr. Usama Ahmed</div>
+              <div class="fm-id">Supervisor</div>
+            </div>
+          </div>
+          <div class="footer-member">
+            <div class="fm-dot" style="background: var(--teal)"></div>
+            <div>
+              <div class="fm-name">Rimsha Shehzadi</div>
+              <div class="fm-id">222027</div>
+            </div>
+          </div>
+          <div class="footer-member">
+            <div class="fm-dot" style="background: var(--blue)"></div>
+            <div>
+              <div class="fm-name">Iqra Waheed</div>
+              <div class="fm-id">221982</div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-</section>
+    </footer>
 
-<div class="divider"></div>
+    <script>
+      // PROGRESS BAR
+      const bar = document.getElementById("prog");
+      window.addEventListener(
+        "scroll",
+        () => {
+          bar.style.width =
+            Math.min(
+              (window.scrollY /
+                (document.body.scrollHeight - window.innerHeight)) *
+                100,
+              100
+            ) + "%";
+        },
+        { passive: true }
+      );
 
-<!-- FOOTER -->
-<footer>
-  <div class="footer-inner">
-    <div class="footer-left">
-      <div class="footer-uni">Government College University Faisalabad</div>
-      <div class="footer-dept">Dept. of Software Engineering · FYP 2022–2026 · AI-Based Skin Lesion Detection</div>
-    </div>
-    <div class="footer-team">
-      <div class="footer-member">
-        <div class="fm-dot" style="background:var(--amber)"></div>
-        <div><div class="fm-name">Dr. Usama Ahmed</div><div class="fm-id">Supervisor</div></div>
-      </div>
-      <div class="footer-member">
-        <div class="fm-dot" style="background:var(--teal)"></div>
-        <div><div class="fm-name">Rimsha Shehzadi</div><div class="fm-id">222027</div></div>
-      </div>
-      <div class="footer-member">
-        <div class="fm-dot" style="background:var(--blue)"></div>
-        <div><div class="fm-name">Iqra Waheed</div><div class="fm-id">221982</div></div>
-      </div>
-    </div>
-  </div>
-</footer>
+      // SCROLL REVEAL
+      const obs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) e.target.classList.add("visible");
+          });
+        },
+        { threshold: 0.08 }
+      );
+      document.querySelectorAll(".reveal").forEach((el) => obs.observe(el));
 
-<script>
-// PROGRESS BAR
-const bar=document.getElementById('prog');
-window.addEventListener('scroll',()=>{
-  bar.style.width=Math.min((window.scrollY/(document.body.scrollHeight-window.innerHeight))*100,100)+'%';
-},{passive:true});
+      // MOBILE NAV
+      const menuBtn = document.getElementById("menuBtn");
+      const navLinks = document.getElementById("navLinks");
+      menuBtn.addEventListener("click", () =>
+        navLinks.classList.toggle("open")
+      );
+      navLinks
+        .querySelectorAll("a")
+        .forEach((a) =>
+          a.addEventListener("click", () => navLinks.classList.remove("open"))
+        );
 
-// SCROLL REVEAL
-const obs=new IntersectionObserver(entries=>{
-  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')});
-},{threshold:0.08});
-document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+      // NAV ACTIVE HIGHLIGHT
+      const secs = document.querySelectorAll("section[id]");
+      const navAs = document.querySelectorAll(".nav-links a");
+      window.addEventListener(
+        "scroll",
+        () => {
+          let cur = "";
+          secs.forEach((s) => {
+            if (window.scrollY >= s.offsetTop - 90) cur = s.id;
+          });
+          navAs.forEach((a) => {
+            a.classList.toggle("active", a.getAttribute("href") === "#" + cur);
+          });
+        },
+        { passive: true }
+      );
 
-// MOBILE NAV
-const menuBtn=document.getElementById('menuBtn');
-const navLinks=document.getElementById('navLinks');
-menuBtn.addEventListener('click',()=>navLinks.classList.toggle('open'));
-navLinks.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>navLinks.classList.remove('open')));
+      // THEME TOGGLE
+      const html = document.documentElement;
+      const btn = document.getElementById("themeBtn");
+      const saved = localStorage.getItem("theme") || "dark";
+      html.setAttribute("data-theme", saved);
+      btn.textContent = saved === "dark" ? "☀️" : "🌙";
+      btn.addEventListener("click", () => {
+        const next =
+          html.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        html.setAttribute("data-theme", next);
+        btn.textContent = next === "dark" ? "☀️" : "🌙";
+        localStorage.setItem("theme", next);
+      });
 
-// NAV ACTIVE HIGHLIGHT
-const secs=document.querySelectorAll('section[id]');
-const navAs=document.querySelectorAll('.nav-links a');
-window.addEventListener('scroll',()=>{
-  let cur='';
-  secs.forEach(s=>{if(window.scrollY>=s.offsetTop-90)cur=s.id});
-  navAs.forEach(a=>{
-    a.classList.toggle('active',a.getAttribute('href')==='#'+cur);
-  });
-},{passive:true});
-
-// THEME TOGGLE
-const html=document.documentElement;
-const btn=document.getElementById('themeBtn');
-const saved=localStorage.getItem('theme')||'dark';
-html.setAttribute('data-theme',saved);
-btn.textContent=saved==='dark'?'☀️':'🌙';
-btn.addEventListener('click',()=>{
-  const next=html.getAttribute('data-theme')==='dark'?'light':'dark';
-  html.setAttribute('data-theme',next);
-  btn.textContent=next==='dark'?'☀️':'🌙';
-  localStorage.setItem('theme',next);
-});
-
-// CARD HOVER SUBTLE GLOW
-document.querySelectorAll('.tool-card,.dl-card,.team-card').forEach(c=>{
-  c.addEventListener('mousemove',e=>{
-    const r=c.getBoundingClientRect();
-    c.style.background=`radial-gradient(circle at ${((e.clientX-r.left)/r.width)*100}% ${((e.clientY-r.top)/r.height)*100}%,rgba(255,255,255,0.025) 0%,var(--card-bg) 65%)`;
-  });
-  c.addEventListener('mouseleave',()=>c.style.background='');
-});
-</script>
-</body>
+      // CARD HOVER SUBTLE GLOW
+      document
+        .querySelectorAll(".tool-card,.dl-card,.team-card")
+        .forEach((c) => {
+          c.addEventListener("mousemove", (e) => {
+            const r = c.getBoundingClientRect();
+            c.style.background = `radial-gradient(circle at ${
+              ((e.clientX - r.left) / r.width) * 100
+            }% ${
+              ((e.clientY - r.top) / r.height) * 100
+            }%,rgba(255,255,255,0.025) 0%,var(--card-bg) 65%)`;
+          });
+          c.addEventListener("mouseleave", () => (c.style.background = ""));
+        });
+    </script>
+  </body>
 </html>
